@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import "./App.css";
-import MovieList from "./components/MovieList/movielist";
+import MovieList from "./components/MovieList/MovieList";
 import MovieDetails from "./components/MovieDetails/MovieDetails";
 import SearchBar from "./components/SearchBar/SearchBar";
 
