@@ -4,8 +4,8 @@
   left: 0;
   width: 100vw;
   z-index: 100;
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   background: #18181c;
   box-shadow: 0 2px 16px rgba(0,0,0,0.18);
 }
@@ -15,20 +15,11 @@
   margin: 0 auto;
   width: 100%;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 2.5rem;
-}
-
-.navbar {
-  width: 100%;
-  background: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0 1.5rem;
 }
 
 .navbar-logo {
@@ -36,16 +27,68 @@
   font-size: 1.6rem;
   font-weight: bold;
   letter-spacing: 1px;
-  margin-right: 2.5rem;
+  flex-shrink: 0;
+}
+
+.hamburger-icon {
+  display: none; /* Hidden on desktop */
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .navbar-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .hamburger-icon {
+    display: block; /* Show on mobile */
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    z-index: 110;
+  }
+
+  .navbar-content {
+    display: none; /* Hidden by default on mobile */
+    flex-direction: column;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .navbar-content.is-open {
+    display: flex; /* Show when menu is open */
+  }
 }
 
 .navbar-links {
   display: flex;
-  gap: 2.2rem;
+  gap: 2rem;
   list-style: none;
   margin: 0;
   padding: 0;
   align-items: center;
+  flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+  .navbar-links {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  .navbar-links li {
+    width: 100%;
+    text-align: left;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+  }
 }
 
 .navbar-links li {
@@ -59,12 +102,25 @@
 
 .navbar-links li.active, .navbar-links li:hover {
   color: #fff;
+  /* Background color handled by inline style in JSX */
 }
 
 .navbar-search-group {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .navbar-search-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .navbar-search, .navbar-filter {
+    width: 100%;
+  }
 }
 
 .navbar-search {
@@ -91,5 +147,11 @@
 }
 
 body, .app {
-  padding-top: 120px;
+  padding-top: 80px;
+}
+
+@media (max-width: 768px) {
+  body, .app {
+    padding-top: 160px;
+  }
 } 

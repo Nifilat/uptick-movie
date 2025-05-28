@@ -10,8 +10,11 @@ import SectionRow from "./components/SectionRow/SectionRow";
 import MovieDetails from "./components/MovieDetails/MovieDetails";
 
 function App() {
+  const [trending, setTrending] = useState([]);
   const [movies, setMovies] = useState([]);
-  const [genres, setGenres] = useState([]);
+  const [series, setSeries] = useState([]);
+  const [movieGenres, setMovieGenres] = useState([]);
+  const [tvGenres, setTvGenres] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
@@ -19,7 +22,7 @@ function App() {
   const [activeNav, setActiveNav] = useState("home");
 
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchTrending = async () => {
       try {
         const response = await axios.get(
           `https://api.themoviedb.org/3/trending/all/week`,
@@ -29,13 +32,47 @@ function App() {
             },
           }
         );
+        setTrending(response.data.results);
+      } catch (error) {
+        console.error("Error fetching trending:", error);
+      }
+    };
+
+    const fetchMovies = async () => {
+      try {
+        const response = await axios.get(
+          `https://api.themoviedb.org/3/discover/movie`,
+          {
+            params: {
+              api_key: import.meta.env.VITE_TMDB_API_KEY,
+              sort_by: "popularity.desc",
+            },
+          }
+        );
         setMovies(response.data.results);
       } catch (error) {
         console.error("Error fetching movies:", error);
       }
     };
 
-    const fetchGenres = async () => {
+    const fetchSeries = async () => {
+      try {
+        const response = await axios.get(
+          `https://api.themoviedb.org/3/discover/tv`,
+          {
+            params: {
+              api_key: import.meta.env.VITE_TMDB_API_KEY,
+              sort_by: "popularity.desc",
+            },
+          }
+        );
+        setSeries(response.data.results);
+      } catch (error) {
+        console.error("Error fetching series:", error);
+      }
+    };
+
+    const fetchMovieGenres = async () => {
       try {
         const response = await axios.get(
           `https://api.themoviedb.org/3/genre/movie/list`,
@@ -45,17 +82,44 @@ function App() {
             },
           }
         );
-        setGenres(response.data.genres);
+        setMovieGenres(response.data.genres);
       } catch (error) {
-        console.error("Error fetching genres:", error);
+        console.error("Error fetching movie genres:", error);
       }
     };
 
+    const fetchTvGenres = async () => {
+      try {
+        const response = await axios.get(
+          `https://api.themoviedb.org/3/genre/tv/list`,
+          {
+            params: {
+              api_key: import.meta.env.VITE_TMDB_API_KEY,
+            },
+          }
+        );
+        setTvGenres(response.data.genres);
+      } catch (error) {
+        console.error("Error fetching tv genres:", error);
+      }
+    };
+
+    fetchTrending();
     fetchMovies();
-    fetchGenres();
+    fetchSeries();
+    fetchMovieGenres();
+    fetchTvGenres();
   }, []);
 
-  const genreNames = (genreIds) => {
+  // Pick correct genres for current tab
+  let currentGenres = movieGenres;
+  if (activeNav === "series" || activeNav === "anime") {
+    currentGenres = tvGenres;
+  }
+
+  // Helper for genre names
+  const genreNames = (genreIds, type = "movie") => {
+    const genres = type === "tv" ? tvGenres : movieGenres;
     return genreIds
       .map((genreId) => {
         const genre = genres.find((genre) => genre.id === genreId);
@@ -64,27 +128,32 @@ function App() {
       .join(", ");
   };
 
-  // Featured movie for hero section (first trending movie)
-  const featuredMovie = movies.length > 0 ? movies[0] : null;
+  // Featured item logic based on tab
+  let featuredItem = null;
+  if (activeNav === "home") {
+    featuredItem = trending.length > 0 ? trending[0] : null;
+  } else if (activeNav === "movies") {
+    featuredItem = movies.length > 0 ? movies[0] : null;
+  } else if (activeNav === "series") {
+    featuredItem = series.length > 0 ? series[0] : null;
+  } else if (activeNav === "anime") {
+    const animeGenreId = tvGenres.find((g) => g.name.toLowerCase() === "animation")?.id;
+    const anime = series.filter((m) => m.genre_ids.includes(animeGenreId));
+    featuredItem = anime.length > 0 ? anime[0] : null;
+  }
 
-  // Trending: first 12 movies/series
-  const trending = movies.slice(0, 12);
   // New Collections: latest 16 movies/series (reverse order for demo)
-  const newCollections = [...movies].reverse().slice(0, 16);
-  // All Movies: filter for type 'movie'
-  const allMovies = movies.filter((m) => m.media_type === "movie");
-  // All Series: filter for type 'tv'
-  const allSeries = movies.filter((m) => m.media_type === "tv");
-  // Anime: filter by genre (e.g., Animation or a specific genre id)
-  const animeGenreId = genres.find((g) => g.name.toLowerCase() === "animation")?.id;
-  const anime = movies.filter((m) => m.genre_ids.includes(animeGenreId));
+  const newCollections = [...trending].reverse().slice(0, 16);
+  // Anime: filter by genre (e.g., Animation or a specific genre id from tvGenres)
+  const animeGenreId = tvGenres.find((g) => g.name.toLowerCase() === "animation")?.id;
+  const anime = series.filter((m) => m.genre_ids.includes(animeGenreId));
 
   // Generate years for dropdown (1980 to current year)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1979 }, (_, i) => String(currentYear - i));
 
   // Filter by search, genre, and year
-  const filterAll = (items) => {
+  const filterAll = (items, type = "movie") => {
     let filtered = [...items];
     if (searchQuery) {
       filtered = filtered.filter((movie) =>
@@ -111,10 +180,16 @@ function App() {
   const anyFilterActive = searchQuery || selectedGenre || selectedYear;
   let mainContent = null;
   if (anyFilterActive) {
+    // Use correct type for filtering: if on series/anime, filter TV, else all
+    let items = trending;
+    if (activeNav === "movies") items = movies;
+    else if (activeNav === "series" || activeNav === "anime") items = series;
+    // For anime, filter only anime
+    if (activeNav === "anime") items = anime;
     mainContent = (
       <SectionRow
         title="Results"
-        items={filterAll(movies)}
+        items={filterAll(items)}
         onCardClick={setSelectedMovie}
         genreNames={genreNames}
       />
@@ -124,7 +199,7 @@ function App() {
       <>
         <SectionRow
           title="Trending"
-          items={trending}
+          items={trending.slice(0, 12)}
           onCardClick={setSelectedMovie}
           genreNames={genreNames}
         />
@@ -140,7 +215,7 @@ function App() {
     mainContent = (
       <SectionRow
         title="All Movies"
-        items={allMovies}
+        items={movies}
         onCardClick={setSelectedMovie}
         genreNames={genreNames}
       />
@@ -149,7 +224,7 @@ function App() {
     mainContent = (
       <SectionRow
         title="All Series"
-        items={allSeries}
+        items={series}
         onCardClick={setSelectedMovie}
         genreNames={genreNames}
       />
@@ -172,14 +247,21 @@ function App() {
         onNavClick={setActiveNav}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        genres={genres}
+        genres={currentGenres}
         selectedGenre={selectedGenre}
         onGenreChange={setSelectedGenre}
         years={years}
         selectedYear={selectedYear}
         onYearChange={setSelectedYear}
       />
-      <HeroSection movie={featuredMovie} onViewMore={() => setSelectedMovie(featuredMovie)} />
+      {/* Only show HeroSection if not on Profile tab and featuredItem exists */}
+      {activeNav !== "profile" && featuredItem && (
+        <HeroSection
+          movie={featuredItem}
+          onViewMore={() => setSelectedMovie(featuredItem)}
+          mediaType={featuredItem.media_type}
+        />
+      )}
       <div className="main-content">
         {mainContent}
       </div>
