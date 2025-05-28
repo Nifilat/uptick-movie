@@ -22,12 +22,12 @@ Celestial is a visually stunning movie and TV show browser. It features trending
 ---
 
 ## 📸 Screenshots
-> Add screenshots of the Home, Movies, Series, Anime, and Details modal here
-![Home Page](screenshots/home.png)
-![Movies Page](screenshots/movies.png)
-![Series Page](screenshots/series.png)
-![Anime Page](screenshots/anime.png)
-![Details Modal](screenshots/details.png)
+<!-- > Add screenshots of the Home, Movies, Series, Anime, and Details modal here -->
+- [Home Page](screenshots/home.png)
+- [Movies Page](screenshots/movies.png)
+- [Series Page](screenshots/series.png)
+- [Anime Page](screenshots/anime.png)
+- [Details Modal](screenshots/details.png)
 
 
 ---
