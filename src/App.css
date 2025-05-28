@@ -7,23 +7,26 @@
   flex-wrap: nowrap;
 }
 
-.app {
+body, .app {
+  background: #101014;
   min-height: 100vh;
-  background-color: #f8f9fa;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 2.5rem 1.5rem;
+}
+
+.main-content {
+  margin-top: 0.5rem;
+  padding-bottom: 2rem;
+}
+
+/* Remove old header styles if present */
 .app-header {
-  background-color: #007bff;
-  color: white;
-  padding: 1rem 2rem;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 600;
+  display: none;
 }
 
 /* Responsive adjustments */
@@ -48,21 +51,7 @@
   }
 }
 
-.main-content {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  min-width: 340px;
-  max-width: 400px;
-  background: #f8f9fa;
-  padding: 2rem 1rem;
-}
-
-.movies-area {
-  flex: 1;
-  background: #141414;
-  overflow-x: hidden;
-  padding: 2rem 0;
+/* Remove sidebar and movies-area if not used */
+.sidebar, .movies-area {
+  display: none;
 }
