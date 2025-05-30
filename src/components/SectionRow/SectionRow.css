@@ -19,9 +19,8 @@
   gap: 1.2rem;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: #28282f #18181c;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   max-width: 100vw;
 }
 
@@ -41,12 +40,7 @@
 }
 
 .section-cards::-webkit-scrollbar {
-  height: 8px;
-  background: #18181c;
-}
-.section-cards::-webkit-scrollbar-thumb {
-  background: #28282f;
-  border-radius: 8px;
+  display: none;
 }
 
 .section-card {
@@ -92,19 +86,18 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  background: #23232a;
-  background-opacity: 0.8;
+  background-color: rgba(35, 35, 42, 0.8);
   color: #fff;
   border: none;
   border-radius: 9999px;
   padding: 0.5rem;
   cursor: pointer;
-  transition: background-opacity 0.2s, transform 0.2s;
+  transition: background-color 0.2s, transform 0.2s;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 .scroll-arrow:hover {
-  background-opacity: 1;
+  background-color: #23232a;
   transform: translateY(-50%) scale(1.1);
 }
 

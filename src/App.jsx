@@ -13,6 +13,7 @@ function App() {
   const [trending, setTrending] = useState([]);
   const [movies, setMovies] = useState([]);
   const [series, setSeries] = useState([]);
+  const [animeList, setAnimeList] = useState([]);
   const [movieGenres, setMovieGenres] = useState([]);
   const [tvGenres, setTvGenres] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +21,31 @@ function App() {
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [activeNav, setActiveNav] = useState("home");
+
+  // Move fetchAnime outside of useEffect
+  const fetchAnime = async () => {
+    try {
+      const animeGenreId = tvGenres.find((g) => g.name.toLowerCase() === "animation")?.id;
+      if (!animeGenreId) {
+        console.warn("Animation genre ID not found.");
+        return;
+      }
+      const response = await axios.get(
+        `https://api.themoviedb.org/3/discover/tv`,
+        {
+          params: {
+            api_key: import.meta.env.VITE_TMDB_API_KEY,
+            with_genres: animeGenreId,
+            sort_by: "popularity.desc",
+          },
+        }
+      );
+      setAnimeList(response.data.results);
+      
+    } catch (error) {
+      
+    }
+  };
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -35,6 +61,7 @@ function App() {
         setTrending(response.data.results);
       } catch (error) {
         console.error("Error fetching trending:", error);
+
       }
     };
 
@@ -99,6 +126,7 @@ function App() {
           }
         );
         setTvGenres(response.data.genres);
+        console.log('TV Genres:', response.data.genres);
       } catch (error) {
         console.error("Error fetching tv genres:", error);
       }
@@ -111,13 +139,18 @@ function App() {
     fetchTvGenres();
   }, []);
 
-  // Pick correct genres for current tab
+  // Fetch anime when tvGenres is available
+  useEffect(() => {
+    if (tvGenres.length > 0) {
+      fetchAnime();
+    }
+  }, [tvGenres]);
+
   let currentGenres = movieGenres;
   if (activeNav === "series" || activeNav === "anime") {
     currentGenres = tvGenres;
   }
 
-  // Helper for genre names
   const genreNames = (genreIds, type = "movie") => {
     const genres = type === "tv" ? tvGenres : movieGenres;
     return genreIds
@@ -128,7 +161,6 @@ function App() {
       .join(", ");
   };
 
-  // Featured item logic based on tab
   let featuredItem = null;
   if (activeNav === "home") {
     featuredItem = trending.length > 0 ? trending[0] : null;
@@ -137,61 +169,54 @@ function App() {
   } else if (activeNav === "series") {
     featuredItem = series.length > 0 ? series[0] : null;
   } else if (activeNav === "anime") {
-    const animeGenreId = tvGenres.find((g) => g.name.toLowerCase() === "animation")?.id;
-    const anime = series.filter((m) => m.genre_ids.includes(animeGenreId));
-    featuredItem = anime.length > 0 ? anime[0] : null;
+    featuredItem = animeList.length > 0 ? animeList[0] : null;
   }
 
-  // New Collections: latest 16 movies/series (reverse order for demo)
   const newCollections = [...trending].reverse().slice(0, 16);
-  // Anime: filter by genre (e.g., Animation or a specific genre id from tvGenres)
-  const animeGenreId = tvGenres.find((g) => g.name.toLowerCase() === "animation")?.id;
-  const anime = series.filter((m) => m.genre_ids.includes(animeGenreId));
+  const anime = animeList;
 
-  // Generate years for dropdown (1980 to current year)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1979 }, (_, i) => String(currentYear - i));
 
-  // Filter by search, genre, and year
-  const filterAll = (items, type = "movie") => {
+  const filterAll = (items) => {
     let filtered = [...items];
     if (searchQuery) {
-      filtered = filtered.filter((movie) =>
-        (movie.title || movie.name)
+      filtered = filtered.filter((item) =>
+        (item.title || item.name)
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       );
     }
     if (selectedGenre) {
-      filtered = filtered.filter((movie) =>
-        movie.genre_ids && movie.genre_ids.includes(Number(selectedGenre))
-      );
+      filtered = filtered.filter((item) => {
+         const genresToFilter = (activeNav === "series" || activeNav === "anime") ? tvGenres : movieGenres;
+         return item.genre_ids && item.genre_ids.includes(Number(selectedGenre)) &&
+                genresToFilter.some(genre => genre.id === Number(selectedGenre));
+      });
     }
     if (selectedYear) {
-      filtered = filtered.filter((movie) => {
-        const releaseDate = movie.release_date || movie.first_air_date;
+      filtered = filtered.filter((item) => {
+        const releaseDate = item.release_date || item.first_air_date;
         return releaseDate && releaseDate.startsWith(selectedYear);
       });
     }
     return filtered;
   };
 
-  // If any filter/search is active, show all matching results
   const anyFilterActive = searchQuery || selectedGenre || selectedYear;
   let mainContent = null;
   if (anyFilterActive) {
-    // Use correct type for filtering: if on series/anime, filter TV, else all
-    let items = trending;
-    if (activeNav === "movies") items = movies;
-    else if (activeNav === "series" || activeNav === "anime") items = series;
-    // For anime, filter only anime
-    if (activeNav === "anime") items = anime;
+    let baseItems = trending;
+    if (activeNav === "movies") baseItems = movies;
+    else if (activeNav === "series") baseItems = series;
+    else if (activeNav === "anime") baseItems = animeList;
+
     mainContent = (
       <SectionRow
         title="Results"
-        items={filterAll(items)}
+        items={filterAll(baseItems)}
         onCardClick={setSelectedMovie}
-        genreNames={genreNames}
+        genreNames={(genreIds) => genreNames(genreIds, activeNav === "movies" ? "movie" : "tv")}
       />
     );
   } else if (activeNav === "home") {
@@ -201,13 +226,13 @@ function App() {
           title="Trending"
           items={trending.slice(0, 12)}
           onCardClick={setSelectedMovie}
-          genreNames={genreNames}
+          genreNames={(genreIds) => genreNames(genreIds, "all")}
         />
         <SectionRow
           title="New Collections"
           items={newCollections}
           onCardClick={setSelectedMovie}
-          genreNames={genreNames}
+          genreNames={(genreIds) => genreNames(genreIds, "all")}
         />
       </>
     );
@@ -217,7 +242,7 @@ function App() {
         title="All Movies"
         items={movies}
         onCardClick={setSelectedMovie}
-        genreNames={genreNames}
+        genreNames={(genreIds) => genreNames(genreIds, "movie")}
       />
     );
   } else if (activeNav === "series") {
@@ -226,16 +251,16 @@ function App() {
         title="All Series"
         items={series}
         onCardClick={setSelectedMovie}
-        genreNames={genreNames}
+        genreNames={(genreIds) => genreNames(genreIds, "tv")}
       />
     );
   } else if (activeNav === "anime") {
     mainContent = (
       <SectionRow
         title="All Anime"
-        items={anime}
+        items={animeList}
         onCardClick={setSelectedMovie}
-        genreNames={genreNames}
+        genreNames={(genreIds) => genreNames(genreIds, "tv")}
       />
     );
   }
@@ -254,7 +279,6 @@ function App() {
         selectedYear={selectedYear}
         onYearChange={setSelectedYear}
       />
-      {/* Only show HeroSection if not on Profile tab and featuredItem exists */}
       {activeNav !== "profile" && featuredItem && (
         <HeroSection
           movie={featuredItem}
@@ -269,7 +293,7 @@ function App() {
         <MovieDetails
           movie={selectedMovie}
           onClose={() => setSelectedMovie(null)}
-          genreNames={genreNames}
+          genreNames={(genreIds) => genreNames(genreIds, selectedMovie?.media_type)}
         />
       )}
     </div>

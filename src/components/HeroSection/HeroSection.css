@@ -12,7 +12,7 @@
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(24,24,28,0.92) 60%, rgba(24,24,28,0.2) 100%);
+  background: linear-gradient(90deg, rgba(24,24,28,0.95) 60%, rgba(24,24,28,0.2) 100%);
   display: flex;
   align-items: center;
   height: 100%;
@@ -34,6 +34,17 @@
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
   color: #e0e0e0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-desc-short {
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 .hero-btn {
@@ -50,4 +61,44 @@
 
 .hero-btn:hover {
   background: #1fa06b;
+}
+
+/* Responsive styles for Hero Section */
+@media (max-width: 768px) {
+  .hero-section {
+    height: 250px; /* Shorter height on mobile */
+    border-radius: 12px;
+    margin-bottom: 1.5rem; /* Reduced margin bottom on mobile */
+  }
+
+  .hero-overlay {
+    background: linear-gradient(90deg, rgba(24,24,28,0.95) 70%, rgba(24,24,28,0.3) 100%);
+  }
+
+  .hero-content {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+
+  .hero-title {
+    font-size: 1.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+
+  .hero-desc-short {
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+  }
+
+  .hero-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+  }
 } 
