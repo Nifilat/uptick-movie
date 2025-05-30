@@ -24,10 +24,6 @@ body, .app {
   padding-bottom: 2rem;
 }
 
-/* Remove old header styles if present */
-.app-header {
-  display: none;
-}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -49,11 +45,6 @@ body, .app {
   .year-filter {
     width: 100%;
   }
-}
-
-/* Remove sidebar and movies-area if not used */
-.sidebar, .movies-area {
-  display: none;
 }
 
 .coming-soon-container {

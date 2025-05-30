@@ -1,7 +1,7 @@
 import React from "react";
 import "./HeroSection.css";
 
-const truncateWords = (text, wordLimit = 30) => {
+const truncateWords = (text, wordLimit = 10) => {
     if (!text) return '';
     const words = text.split(' ');
     if (words.length <= wordLimit) return text;
@@ -22,7 +22,7 @@ const HeroSection = ({ movie, onViewMore }) => {
       <div className="hero-overlay">
         <div className="hero-content">
           <h2 className="hero-title">{movie.title || movie.name}</h2>
-          <p className="hero-desc">{truncateWords(movie.overview, 30)}</p>
+          <p className="hero-desc">{truncateWords(movie.overview, 10)}</p>
           <button className="hero-btn" onClick={onViewMore}>
             View More
           </button>

@@ -6,7 +6,6 @@ const MovieCard = ({ movie, genreNames, onMovieClick }) => {
     <div
       className="movie-card"
        onClick={() => {
-           console.log('Card clicked:', movie);
            onMovieClick(movie);
          }}
         
