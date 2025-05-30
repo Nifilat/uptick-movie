@@ -17,6 +17,7 @@ function App() {
   const [movieGenres, setMovieGenres] = useState([]);
   const [tvGenres, setTvGenres] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedMovie, setSelectedMovie] = useState(null);
@@ -46,6 +47,62 @@ function App() {
       
     }
   };
+
+  // Add search function
+  const searchContent = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      // Search for movies
+      const movieResponse = await axios.get(
+        `https://api.themoviedb.org/3/search/movie`,
+        {
+          params: {
+            api_key: import.meta.env.VITE_TMDB_API_KEY,
+            query: query,
+          },
+        }
+      );
+
+      // Search for TV shows
+      const tvResponse = await axios.get(
+        `https://api.themoviedb.org/3/search/tv`,
+        {
+          params: {
+            api_key: import.meta.env.VITE_TMDB_API_KEY,
+            query: query,
+          },
+        }
+      );
+
+      // Combine and format results
+      const combinedResults = [
+        ...movieResponse.data.results.map(movie => ({ ...movie, media_type: 'movie' })),
+        ...tvResponse.data.results.map(show => ({ ...show, media_type: 'tv' }))
+      ];
+
+      setSearchResults(combinedResults);
+    } catch (error) {
+      console.error("Error searching content:", error);
+      setSearchResults([]);
+    }
+  };
+
+  // Add useEffect to trigger search when query changes
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery) {
+        searchContent(searchQuery);
+      } else {
+        setSearchResults([]);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -178,16 +235,10 @@ function App() {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1979 }, (_, i) => String(currentYear - i));
 
-  // Filter by search, genre, and year
+  // Update the filterAll function to use searchResults when searching
   const filterAll = (items) => {
-    let filtered = [...items];
-    if (searchQuery) {
-      filtered = filtered.filter((item) =>
-        (item.title || item.name)
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      );
-    }
+    let filtered = searchQuery ? searchResults : [...items];
+    
     if (selectedGenre) {
       filtered = filtered.filter((item) => {
          const genresToFilter = (activeNav === "series" || activeNav === "anime") ? tvGenres : movieGenres;
