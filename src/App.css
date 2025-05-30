@@ -10,7 +10,7 @@
 body, .app {
   background: #101014;
   min-height: 100vh;
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .app {
@@ -54,4 +54,29 @@ body, .app {
 /* Remove sidebar and movies-area if not used */
 .sidebar, .movies-area {
   display: none;
+}
+
+.coming-soon-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: 2rem;
+  color: #fff;
+}
+
+.coming-soon-container h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #23c483;
+}
+
+.coming-soon-container p {
+  font-size: 1.1rem;
+  color: #e0e0e0;
+  max-width: 400px;
+  line-height: 1.6;
 }

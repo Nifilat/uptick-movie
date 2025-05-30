@@ -63,10 +63,10 @@ const NavigationBar = ({
             {links.map((link) => (
               <li
                 key={link.key}
-                className={`rounded-xl px-4 py-2 cursor-pointer font-medium transition-colors duration-300 ${active === link.key ? 'text-white' : 'text-gray-300 hover:bg-[#23232a]'}`}
+                className={`navbar-link ${active === link.key ? 'active' : ''}`}
                 onClick={() => {
                   onNavClick(link.key);
-                  setIsMenuOpen(false); // Close menu on link click
+                  setIsMenuOpen(false);
                 }}
                 style={
                   active === link.key
@@ -74,7 +74,7 @@ const NavigationBar = ({
                     : {}
                 }
               >
-                {link.name}
+                {link.name.toUpperCase()}
               </li>
             ))}
           </ul>

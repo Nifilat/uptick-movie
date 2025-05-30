@@ -178,6 +178,7 @@ function App() {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1979 }, (_, i) => String(currentYear - i));
 
+  // Filter by search, genre, and year
   const filterAll = (items) => {
     let filtered = [...items];
     if (searchQuery) {
@@ -203,18 +204,31 @@ function App() {
     return filtered;
   };
 
+  // If any filter/search is active, show all matching results
   const anyFilterActive = searchQuery || selectedGenre || selectedYear;
   let mainContent = null;
   if (anyFilterActive) {
-    let baseItems = trending;
-    if (activeNav === "movies") baseItems = movies;
-    else if (activeNav === "series") baseItems = series;
-    else if (activeNav === "anime") baseItems = animeList;
+    // Combine all content for search
+    let allContent = [];
+    if (searchQuery) {
+      // When searching, include all content types
+      allContent = [
+        ...movies.map(m => ({ ...m, media_type: 'movie' })),
+        ...series.map(s => ({ ...s, media_type: 'tv' })),
+        ...animeList.map(a => ({ ...a, media_type: 'tv' }))
+      ];
+    } else {
+      // For genre/year filters, use the current tab's content
+      if (activeNav === "movies") allContent = movies;
+      else if (activeNav === "series") allContent = series;
+      else if (activeNav === "anime") allContent = animeList;
+      else allContent = trending;
+    }
 
     mainContent = (
       <SectionRow
         title="Results"
-        items={filterAll(baseItems)}
+        items={filterAll(allContent)}
         onCardClick={setSelectedMovie}
         genreNames={(genreIds) => genreNames(genreIds, activeNav === "movies" ? "movie" : "tv")}
       />
@@ -262,6 +276,13 @@ function App() {
         onCardClick={setSelectedMovie}
         genreNames={(genreIds) => genreNames(genreIds, "tv")}
       />
+    );
+  } else if (activeNav === "profile") {
+    mainContent = (
+      <div className="coming-soon-container">
+        <h2>Profile Coming Soon</h2>
+        <p>We're working on something exciting! Stay tuned for updates.</p>
+      </div>
     );
   }
 
