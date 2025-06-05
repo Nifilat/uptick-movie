@@ -45,7 +45,7 @@ Celestial is a visually stunning movie and TV show browser. It features trending
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/celestial-movie-app.git
+git clone https://github.com/Nifilat/celestial-movie-app.git
 cd celestial-movie-app
 ```
 
